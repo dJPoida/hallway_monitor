@@ -17,12 +17,20 @@ void setLEDColor(byte r, byte g, byte b) {
   Serial.println(")");
 }
 
-void initLED() {
+
+/**
+ * Initialise the LED
+ * @returns boolean true if the sensor was initialised
+ */
+boolean initLED() {
   pinMode(PIN_LED_POWER, OUTPUT);
   digitalWrite(PIN_LED_POWER, LOW);
   pinMode(PIN_LED_RED, OUTPUT);
   pinMode(PIN_LED_GREEN, OUTPUT);
   pinMode(PIN_LED_BLUE, OUTPUT);
+
+  // TODO: somekind of check to see if the LED was actually initialised
+  return true;
 }
 
 #endif

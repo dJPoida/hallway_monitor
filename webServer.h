@@ -59,18 +59,19 @@ void handleRGB() {
 
 /**
  * Initialise the Web Server
+ * @returns boolean true if the Web Server was started
  */
-void initServer() {
+boolean initWebServer() {
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");
   }
 
   server.on("/rgb", handleRGB);
-  server.serveStatic("/", SPIFFS, "/");
+  server.serveStatic("/", SPIFFS, "/client/");
   server.onNotFound(handleNotFound);
 
   server.begin();
-  Serial.print("HTTP server started on port");
+  Serial.print("HTTP server started on port ");
   Serial.println(serverPort);
 }
 

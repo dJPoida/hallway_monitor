@@ -17,24 +17,10 @@
 #include "pins.h"
 #include "wifi.h"
 #include "webServer.h"
+#include "sensor.h"
 
 // Globals
 const char* ver = "1.0.0";
-
-// States
-bool alarm_triggered = false;
-
-/**
- * Fired when the alarm interrupt is triggered
- */
-void onSensorTripped()
-{
-  if (!alarm_triggered) {
-    alarm_triggered = true;
-  }
-}
-
-
 
 /**
  * Setup
@@ -47,19 +33,34 @@ void setup() {
   Serial.println(ver);
 
   // Start the SPI Flash Files System
-  SPIFFS.begin();
+  if (!SPIFFS.begin()) {
+    Serial.println("Failed to mount file system");
+    return;
+  }
 
   // Initialise the LED
-  initLED();
+  if (!initLED()) {
+    Serial.println("Failed to initialise the LED");
+    return;
+  }
 
   // Initialise the WiFi
-  initWifi();
+  if (!initWifi()) {
+    Serial.println("Failed to initialise the WiFi");
+    return;
+  }
 
-  // Initialise the Server
-  initServer();
+  // Initialise the Web Server
+  if (!initWebServer()) {
+    Serial.println("Failed to initialise the Web Server");
+    return;
+  }
 
-  // Connect the Sensor Interrupt
-  attachInterrupt(digitalPinToInterrupt(PIN_SENSOR), onSensorTripped, RISING);
+  // Initialise the Sensor
+  if (!initSensor()) {
+    Serial.println("Failed to initialise the PIR Sensor");
+    return;
+  }
 }
 
 
@@ -79,15 +80,14 @@ void loop() {
 }
 
 
-
 /**
  * 
  */
 void sendTriggerToIFTTT() {
   Serial.println("Sensor Tripped - Sending Trigger to IFTTT");
-  makeIFTTTRequest();
-  alarm_triggered = false;
-  delay(10000);
+  //makeIFTTTRequest();
+  //alarm_triggered = false;
+  //delay(10000);
 }
 
 

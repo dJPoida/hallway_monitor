@@ -1,6 +1,8 @@
 #ifndef WIFI_H
 #define WIFI_H
 
+boolean wifiConnected = false;
+
 /**
  * Connect to the WiFi network (if not already connected)
  * @returns boolean true if wifi could be connected
@@ -31,9 +33,11 @@ boolean initWifi() {
     Serial.print("WiFi connected."); 
     Serial.print("IP address: "); 
     Serial.println(WiFi.localIP());
+
+    wifiConnected = (WiFi.status() == WL_CONNECTED);
   }
 
-  return (WiFi.status() == WL_CONNECTED);
+  return wifiConnected;
 }
 
 #endif
