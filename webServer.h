@@ -1,6 +1,7 @@
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
+#include <ESP8266WebServer.h>
 #include "config.h"
 #include "ledcontrol.h"
 #include "FS.h"
@@ -13,6 +14,10 @@ ESP8266WebServer server(serverPort);
  * Handles requests that cannot be bound to endpoints
  */
 void handleNotFound(){
+  Serial.print("WebServer: Client accessed unknown path '");
+  Serial.print(server.uri());
+  Serial.println("'");
+
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -50,6 +55,16 @@ void handleRGB() {
     }
   } 
 
+  // Debug
+  Serial.print("WebServer: RGB Change Request to RGB(");
+  Serial.print(r);
+  Serial.print(", ");
+  Serial.print(g);
+  Serial.print(", ");
+  Serial.print(b);
+  Serial.println(")");
+
+  // Request the change to the LED
   setLEDColor(r, g, b);
   
   server.send(200, "text/plain", "OK");       //Response to the HTTP 
@@ -66,8 +81,16 @@ boolean initWebServer() {
     Serial.println("MDNS responder started");
   }
 
-  server.on("/rgb", handleRGB);
-  server.serveStatic("/", SPIFFS, "/client/");
+  // Static Assets
+  // For some reason I couldn't get a path based wildcard static serve to work. Had to declare each asset individually.
+  server.serveStatic("/", SPIFFS, "/index.html");
+  server.serveStatic("/index.html", SPIFFS, "/index.html");
+  server.serveStatic("/index.js", SPIFFS, "/index.js");
+  server.serveStatic("/index.css", SPIFFS, "/index.css");
+
+  // API
+  server.on("/rgb", HTTP_GET, handleRGB);
+  
   server.onNotFound(handleNotFound);
 
   server.begin();

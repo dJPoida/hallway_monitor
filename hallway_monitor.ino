@@ -22,10 +22,14 @@
 // Globals
 const char* ver = "1.0.0";
 
+
+
 /**
  * Setup
  */
 void setup() {
+  delay(1000);
+  
   // Serial Initialisation
   Serial.begin(115200);
   Serial.println("");
@@ -46,8 +50,10 @@ void setup() {
 
   // Initialise the WiFi
   if (!initWifi()) {
-    Serial.println("Failed to initialise the WiFi");
-    return;
+    Serial.println("Failed to initialise the WiFi.");
+
+    // Failed to initialise the WiFi - Begin broadcasting a hotspot
+    initAccessPointMode();
   }
 
   // Initialise the Web Server
@@ -56,10 +62,13 @@ void setup() {
     return;
   }
 
-  // Initialise the Sensor
-  if (!initSensor()) {
-    Serial.println("Failed to initialise the PIR Sensor");
-    return;
+  // Don't initialise these things if we're in hotSpotMode
+  if (!accessPointMode) {
+    // Initialise the Sensor
+    if (!initSensor()) {
+      Serial.println("Failed to initialise the PIR Sensor");
+      return;
+    }
   }
 }
 
@@ -69,14 +78,19 @@ void setup() {
  * Application Loop
  */
 void loop() {
-  // Check to see if the alarm has been triggered
-  if (alarm_triggered) {
-    sendTriggerToIFTTT();
+  // Don't perform these operations in hotSpotMode
+  if (!accessPointMode) {
+    // Check to see if the alarm has been triggered
+    if (alarm_triggered) {
+      sendTriggerToIFTTT();
+    }
+  } else {
+    // Flash the LEDs to indicate the device is in configuration mode
+    handleFlashAPModeLED();
   }
 
+  // Get the WebServer to handle any client requests in either mode
   server.handleClient();
-
-  delay(10);
 }
 
 
