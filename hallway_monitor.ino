@@ -11,8 +11,6 @@
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
 #include "config.h"
 #include "pins.h"
 #include "wifi.h"
@@ -40,6 +38,18 @@ void setup() {
   if (!SPIFFS.begin()) {
     Serial.println("Failed to mount file system");
     return;
+  }
+  Serial.println("SPIFFS initialised.");
+
+  // Load the config from the onboard SPI File System
+  if (!loadConfig()) {
+    Serial.println("Failed to load configuration from SPIFFS");
+    Serial.print("Creating new Config File... ");
+    if (!saveConfig()) {
+      Serial.println("Failed to create new config file on SPIFFS.");
+      return;
+    }
+    Serial.println("done.");
   }
 
   // Initialise the LED
@@ -88,9 +98,6 @@ void loop() {
     // Flash the LEDs to indicate the device is in configuration mode
     handleFlashAPModeLED();
   }
-
-  // Get the WebServer to handle any client requests in either mode
-  server.handleClient();
 }
 
 

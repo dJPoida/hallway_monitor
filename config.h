@@ -6,10 +6,11 @@
 
 // WiFi Settings
 // TODO: setup multiple WiFi SSIDs and Passwords
-const char* apssid   = "Cheeky";        // The SSID when the device is running in Access Point mode
-const char* ssid     = "";              // The WiFi accesspoint to connect to (this is loaded from SPIFFS)
-const char* password = "";              // The WiFi accesspoint password (this is loaded from SPIFFS)
-const int serverPort = 80;              // The Port to run the server on (this is the default and after initial config is loaded from SPIFFS)
+const char* apssid      = "Hallway Monitor"; // The SSID when the device is running in Access Point mode
+const char* mdnsAddress = "hallway-monitor"; // The address that clients can use to connect to the device without the IP (i.e. http://hallway-monitor.local)
+char* ssid        = "";                // The WiFi accesspoint to connect to (this is loaded from SPIFFS)
+char* password    = "";                // The WiFi accesspoint password (this is loaded from SPIFFS)
+int   serverPort  = 80;                // The Port to run the server on (this is the default and after initial config is loaded from SPIFFS)
 
 // IFTT Notification Endpoint
 // TODO: move these configurations to SPIFFS
@@ -26,6 +27,16 @@ const boolean defaultLED_B = 255;
 const double redBias = 0.2;
 const double greenBias = 1.0;
 const double blueBias = 1.0;
+
+
+
+/**
+ * Declare the Reset Function @ Address 0.
+ * We'll use this when updating the WiFi settings or for a soft restart
+ */
+void(* resetFunc) (void) = 0;
+
+
 
 /**
  * Load the config.json from spiffs
@@ -60,18 +71,59 @@ boolean loadConfig() {
     return false;
   }
 
-  const char* serverName = json["serverName"];
-  const char* accessToken = json["accessToken"];
+  const char* newSSID = json["ssid"];
+  const char* newPassword = json["password"];
 
-  // Real world application would store these values in some variables for
-  // later use.
-
-  Serial.print("Loaded serverName: ");
-  Serial.println(serverName);
-  Serial.print("Loaded accessToken: ");
-  Serial.println(accessToken);
+  ssid = const_cast<char*> (newSSID);
+  password = const_cast<char*> (newPassword);
+  
+  Serial.print("Loaded WiFi SSID: ");
+  Serial.println(ssid);
+  Serial.print("Loaded WiFi Password: ");
+  Serial.println(password);
   
   return true;
+}
+
+
+/**
+ * Save the current configuration to SPIFFS
+ */
+bool saveConfig() {
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& json = jsonBuffer.createObject();
+  json["ssid"] = ssid;
+  json["password"] = password;
+
+  File configFile = SPIFFS.open("/config.json", "w");
+  if (!configFile) {
+    Serial.println("Failed to open config file for writing");
+    return false;
+  }
+
+  json.printTo(configFile);
+  return true;
+}
+
+void setWiFiSettings(const char* newSSID, const char* newPassword) {
+    Serial.print("Configuring and saving new WiFi Hotspot details, SSID: '");
+    Serial.print(newSSID);
+    Serial.print("', Password: '");
+    Serial.print(newPassword);
+    Serial.print("'...");
+
+    ssid = const_cast<char*> (newSSID);
+    password = const_cast<char*> (newPassword);
+
+    // Save the updated config.
+    saveConfig();
+
+    Serial.println(" done.");
+    Serial.println("restarting...");
+
+    // Reset the device
+    // TODO: not verified as working properly
+    resetFunc();
 }
 
 #endif

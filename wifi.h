@@ -1,6 +1,8 @@
 #ifndef WIFI_H
 #define WIFI_H
 
+#include <ESP8266WiFi.h>
+
 boolean wifiConnected = false;
 boolean accessPointMode = false;
 

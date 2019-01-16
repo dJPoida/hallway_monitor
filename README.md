@@ -1,4 +1,4 @@
-# Hallway Monitor
+# Hallway Monitor (aka Cheeky Monkey Detector)
 Arduino / ESP8266 Motion Sensor & Night Light\
 **Author:** Peter Eldred\
 **Date:** 2018-11
@@ -20,6 +20,19 @@ After that, the wife asked if it could have a night light to make trekking down 
 
 ## Dependencies
 - This project depends on the [ESP8266 Sketch Data Upload Tool](http://esp8266.github.io/Arduino/versions/2.0.0/doc/filesystem.html) for storing the website data on the flash memory of the ESP8266.
+- The web server component of this project utilises the [ESP Async TCP](https://github.com/me-no-dev/ESPAsyncTCP) and [ESP Async Web Server](https://github.com/me-no-dev/ESPAsyncWebServer) libraries for asynchronously delivering the control interfaces.
+
+## Compilation and Flashing the device
+TODO
+
+## Operation of the device
+When first turned on, the device will flash red, indicating it is not configured to connect to the local WiFi.
+
+At this point, using a mobile phone, scan for WiFi networks and an open access point called `Hallway Monitor` will be available.
+
+Connect to the Access Point and navigate your browser to [http://192.168.4.1](http://192.168.4.1). You will be presented with a configuration page where you can input a WiFi SSID and Password you want the device to connect to.
+
+Submitting the configuration will re-boot the device. It will attempt to connect to the desired WiFi hotspot, and if successful, the page you were viewing will refresh and you should see the Hallway Monitor control panel.
 
 ## TODO
 - Implement Multiple WiFi access point configuration
@@ -29,5 +42,4 @@ After that, the wife asked if it could have a night light to make trekking down 
     - Accept state changes via web sockets
     - Implement push to clients when state changes
 - Create endpoints for all configuration / settings
-- Connect the sensor
-- Hotspot mode when WiFi connection fails
+- Get MDNS working (responding on http://hallway-monitor.local)
