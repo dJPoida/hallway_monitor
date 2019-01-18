@@ -1,3 +1,5 @@
-
-config.ino
 deploy_test.sh
+
+src/node_modules
+src/config.json
+data/config.json

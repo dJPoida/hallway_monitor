@@ -58,6 +58,12 @@ void setup() {
     return;
   }
 
+  // Initialise the Reset Capability
+  if (!initReset()) {
+    Serial.println("Failed to initialise the Reset function");
+    return;
+  }
+
   // Initialise the WiFi
   if (!initWifi()) {
     Serial.println("Failed to initialise the WiFi.");
@@ -91,7 +97,7 @@ void loop() {
   // Don't perform these operations in hotSpotMode
   if (!accessPointMode) {
     // Check to see if the alarm has been triggered
-    if (alarm_triggered) {
+    if (alarmTriggered) {
       sendTriggerToIFTTT();
     }
   } else {

@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
-  <title>Halway Monitor WiFi Setup</title>
-  <meta name="description" content="Hallway Monitor WiFi Setup Page">
+  <title>Halway Monitor</title>
+  <meta name="description" content="Hallway Monitor Control Page">
   <meta name="author" content="Peter Eldred">
 
   <link rel="stylesheet" href="/css/vendor/mini-dark.min.css?v=1.0">
@@ -20,33 +20,16 @@
   <link rel="icon" type="image/png" href="/img/icon/pwa-512x512.png" sizes="512x512">
   <link rel="apple-touch-icon" href="/img/icon/apple-touch-icon-180x180.png" sizes="180x180">
   <meta name="msapplication-config" content="/img/icon/browserconfig.xml">
-
+  
 </head>
 
 <body>
     <div>
         <h1>Hallway Monitor</h1>
-        <h2>Access Point Mode</h2>
-        <div>
-            <p>You're almost ready to go. The Hallway Montitor isn't configured to connect to an internet enabled WiFi Access Point.</p>
-            <p>Use this form to configure your access point details</p>
-            <div>
-                <form action="/setwifi" method="POST">
-                    <fieldset>
-                        <legend>WiFi Configuration</legend>
-                        <label for="wifiSSID">SSID</label>
-                        <input type="text" id="wifiSSID" name="wifiSSID" placeholder="SSID"/>
-                        <label for="wifiPassword">Password</label>
-                        <input type="text" id="wifiPassword" name="wifiPassword" placeholder="Password"/>
-                        <input type="submit" value="Save" />
-                    </fieldset>
-                </form>
-            </div>
-        </div>
+        <h2>Control Panel</h2>
     </div>
 
-
     <script src="/js/vendor/jquery-3.3.1.min.js"></script>
-    <script src="/js/apmode.js"></script>
+    <script src="/js/index.js"></script>
 </body>
 </html>

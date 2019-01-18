@@ -3,20 +3,24 @@
 
 #include <ArduinoJson.h>
 #include "FS.h"
+#include "reset.h"
+
 
 // WiFi Settings
-// TODO: setup multiple WiFi SSIDs and Passwords
-const char* apssid      = "Hallway Monitor"; // The SSID when the device is running in Access Point mode
-const char* mdnsAddress = "hallway-monitor"; // The address that clients can use to connect to the device without the IP (i.e. http://hallway-monitor.local)
-char* ssid        = "";                // The WiFi accesspoint to connect to (this is loaded from SPIFFS)
-char* password    = "";                // The WiFi accesspoint password (this is loaded from SPIFFS)
-int   serverPort  = 80;                // The Port to run the server on (this is the default and after initial config is loaded from SPIFFS)
+const char* apssid          = "Hallway Monitor";  // The SSID when the device is running in Access Point mode
+const char* mdnsAddress     = "hallway-monitor";  // The address that clients can use to connect to the device without the IP (i.e. http://hallway-monitor.local)
+const char* networkHostname = "HallwayMonitor";   // The Hostname to display when other devices on the network want to identify this device
+char*       ssid            = "";                 // The WiFi accesspoint to connect to (this is loaded from SPIFFS)
+char*       password        = "";                 // The WiFi accesspoint password (this is loaded from SPIFFS)
+int         serverPort      = 80;                 // The Port to run the server on (this is the default and after initial config is loaded from SPIFFS)
 
-// IFTT Notification Endpoint
-// TODO: move these configurations to SPIFFS
-const boolean enableIftttNotification = false;
-const char* iftttServer = "maker.ifttt.com";
-const char* iftttEndpoint = "/trigger/maddie_spotted/with/key/c3nx5tMYazgNfI7rHTRS4y";
+// IFTTT Details (If This Then That)
+boolean iftttEnabled  = false;                // Whether the ifttt integration is enabled
+char*   iftttServer   = "";                   // The ifttt Server address (typically "maker.ifttt.com")
+char*   iftttEndpoint = "";                   // The ifttt Endpoint (something like "/trigger/maddie_spotted/with/key/yourkeyhere")
+
+// Hardware Config
+bool sensorEnabled = false;                   // Whether or not the sensor is enabled
 
 // Defaults
 const boolean defaultLED_R = 255;
@@ -27,14 +31,6 @@ const boolean defaultLED_B = 255;
 const double redBias = 0.2;
 const double greenBias = 1.0;
 const double blueBias = 1.0;
-
-
-
-/**
- * Declare the Reset Function @ Address 0.
- * We'll use this when updating the WiFi settings or for a soft restart
- */
-void(* resetFunc) (void) = 0;
 
 
 
@@ -73,14 +69,27 @@ boolean loadConfig() {
 
   const char* newSSID = json["ssid"];
   const char* newPassword = json["password"];
+  const boolean newIFTTTEnabled = json["iftttEnabled"];
+  const char* newIFTTTServer = json["iftttServer"];
+  const char* newIFTTTEndpoint = json["iftttEndpoint"];
 
   ssid = const_cast<char*> (newSSID);
   password = const_cast<char*> (newPassword);
+  iftttEnabled = newIFTTTEnabled;
+  iftttServer = const_cast<char*> (newIFTTTServer);
+  iftttEndpoint = const_cast<char*> (newIFTTTEndpoint);
   
-  Serial.print("Loaded WiFi SSID: ");
+  Serial.print("Config Loaded from SPIFFS: ");
+  Serial.print(" - WiFi SSID: ");
   Serial.println(ssid);
-  Serial.print("Loaded WiFi Password: ");
+  Serial.print(" - WiFi Password: ");
   Serial.println(password);
+  Serial.print(" - iftttEnabled: ");
+  Serial.println(iftttEnabled);
+  Serial.print(" - ifttt Server: ");
+  Serial.println(iftttServer);
+  Serial.print(" - iftttEndpoint: ");
+  Serial.println(iftttEndpoint);
   
   return true;
 }
@@ -90,10 +99,15 @@ boolean loadConfig() {
  * Save the current configuration to SPIFFS
  */
 bool saveConfig() {
+  Serial.println("Writing settings to configuration file...");
+
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& json = jsonBuffer.createObject();
   json["ssid"] = ssid;
   json["password"] = password;
+  json["iftttEnabled"] = iftttEnabled;
+  json["iftttServer"] = iftttServer;
+  json["iftttEndpoint"] = iftttEndpoint;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -102,9 +116,17 @@ bool saveConfig() {
   }
 
   json.printTo(configFile);
+
+  Serial.println("Successfully saved configuration file.");
+  
   return true;
 }
 
+/**
+ * Change the currrent Wifi Settings (triggered from the Configuration Webistes
+ * @var char* newSSID the new WiFi SSID to save to the device
+ * @var char* newPassword the new WiFi Password to save to the device
+ */
 void setWiFiSettings(const char* newSSID, const char* newPassword) {
     Serial.print("Configuring and saving new WiFi Hotspot details, SSID: '");
     Serial.print(newSSID);
@@ -122,8 +144,7 @@ void setWiFiSettings(const char* newSSID, const char* newPassword) {
     Serial.println("restarting...");
 
     // Reset the device
-    // TODO: not verified as working properly
-    resetFunc();
+    resetDevice();
 }
 
 #endif

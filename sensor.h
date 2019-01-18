@@ -5,15 +5,20 @@
 #include "pins.h"
 
 // States
-bool alarm_triggered = false;
+bool alarmTriggered = false;
+
 
 /**
  * Fired when the alarm interrupt is triggered
  */
 void onSensorTripped()
 {
-  alarm_triggered = !alarm_triggered;
+  if (sensorEnabled) {
+    alarmTriggered = !alarmTriggered;
+  }
 }
+
+
 
 /**
  * Initialise the Sensor
@@ -25,7 +30,6 @@ boolean initSensor() {
   // Connect the Sensor Interrupt
   attachInterrupt(digitalPinToInterrupt(PIN_SENSOR), onSensorTripped, CHANGE);
 
-  // TODO: some kind of check in the future?
   return true;
 }
 

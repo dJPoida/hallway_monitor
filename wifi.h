@@ -12,14 +12,10 @@ boolean accessPointMode = false;
  */
 boolean initWifi() {
   if (WiFi.status() != WL_CONNECTED) {
-
+    WiFi.hostname(networkHostname);
+    
     // Don't bother if we don't have a configuration yet
     if (ssid != "") {
-      //TODO: allow multiple wifi endpoints using wifiMulti (https://tttapa.github.io/ESP8266/Chap11%20-%20SPIFFS.html)
-      //wifiMulti.addAP("ssid_from_AP_1", "your_password_for_AP_1");   // add Wi-Fi networks you want to connect to
-      //wifiMulti.addAP("ssid_from_AP_2", "your_password_for_AP_2");
-      //wifiMulti.addAP("ssid_from_AP_3", "your_password_for_AP_3");
-        
       Serial.print("Connecting to: "); 
       Serial.print(ssid);
       WiFi.begin(ssid, password);  

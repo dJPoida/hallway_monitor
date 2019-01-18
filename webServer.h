@@ -131,13 +131,31 @@ boolean initWebServer() {
     });
   }
 
-  // API
-  server.on("/wifisettings", HTTP_GET, [](AsyncWebServerRequest *request){
+  // Restart the device
+  server.on("/restart", HTTP_POST, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", "Cool. Restarting...");
+    delay(100);
+    resetDevice();
+  });
+
+  // Forget the current wifi configuration and restart the device
+  server.on("/forgetwifi", HTTP_POST, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", "Cool. I'll forget the curret wifi settings. Rebooting...");
+    delay(100);
+    const char* newSSID = "";
+    const char* newPassword = "";
+    setWiFiSettings(newSSID, newPassword);
+  });
+
+  // Set the wifi access point details
+  server.on("/setwifi", HTTP_POST, [](AsyncWebServerRequest *request){
     const char* newSSID = request->arg("wifiSSID").c_str();
     const char* newPassword = request->arg("wifiPassword").c_str();
-    
+
+    request->send(200, "text/plain", "Cool. Updating the WiFi config and Re-booting to check the settings out...");
+    delay(100);
+
     setWiFiSettings(newSSID, newPassword);
-    request->send(200, "text/plain", "Cool. Re-booting to check the settings out.");
   });
 
   //server.on("/rgb", HTTP_GET, handleRGB);

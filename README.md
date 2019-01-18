@@ -32,7 +32,17 @@ At this point, using a mobile phone, scan for WiFi networks and an open access p
 
 Connect to the Access Point and navigate your browser to [http://192.168.4.1](http://192.168.4.1). You will be presented with a configuration page where you can input a WiFi SSID and Password you want the device to connect to.
 
-Submitting the configuration will re-boot the device. It will attempt to connect to the desired WiFi hotspot, and if successful, the page you were viewing will refresh and you should see the Hallway Monitor control panel.
+Submitting the configuration will re-boot the device. It will attempt to connect to the desired WiFi hotspot, and if successful, the page you were viewing will navigate to [http://hallwaymonitor](http://hallwaymonitor) and you should see the Hallway Monitor control panel.
+
+### Troubleshooting
+If you can't navigate to [http://hallwaymonitor](http://hallwaymonitor) then it is likely your network doesn't support local hostname resolution. In this case, your only opportunity is to connect to your router and look for the "Hallway Monitor" attached device, grab it's IP address and plug it straight into your browser.
+
+## API
+| Route | Method | Parameters | comments |
+|:--- |:--- |:--- |:--- |
+| /restart | POST | | Restart the device |
+| /forgetwifi | POST | | Clear the WiFi access point settings and restart the device |
+| /setwifi | POST | (string) wifiSSID<br/>(string) wifiPassword | Update the access point and restarts the device |
 
 ## TODO
 - Implement Multiple WiFi access point configuration
