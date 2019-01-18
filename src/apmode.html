@@ -31,7 +31,7 @@
             <p>You're almost ready to go. The Hallway Montitor isn't configured to connect to an internet enabled WiFi Access Point.</p>
             <p>Use this form to configure your access point details</p>
             <div>
-                <form action="/setwifi" method="POST">
+                <form action="/setwifi" method="GET">
                     <fieldset>
                         <legend>WiFi Configuration</legend>
                         <label for="wifiSSID">SSID</label>
@@ -47,6 +47,7 @@
 
 
     <script src="/js/vendor/jquery-3.3.1.min.js"></script>
+    <script src="/js/globals.js"></script>
     <script src="/js/apmode.js"></script>
 </body>
 </html>

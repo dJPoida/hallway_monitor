@@ -53,12 +53,33 @@ void handleFlashAPModeLED() {
 
 
 /**
+ * Set the nightlight on or off
+ * @var boolean newOn whether the nightlight should be on or off
+ */
+void setNightlightOn(boolean newOn) {
+    Serial.print("Setting the nightlight to: '");
+    if (newOn) {
+      Serial.println("ON");
+    } else {
+      Serial.println("OFF");
+    }
+
+    nightlightOn = newOn;
+    digitalWrite(PIN_LED_POWER, nightlightOn);
+
+    // Save the updated config.
+    saveConfig();
+}
+
+
+
+/**
  * Initialise the LED
  * @returns boolean true if the sensor was initialised
  */
 boolean initLED() {
   pinMode(PIN_LED_POWER, OUTPUT);
-  digitalWrite(PIN_LED_POWER, LOW);
+  digitalWrite(PIN_LED_POWER, nightlightOn);
   pinMode(PIN_LED_RED, OUTPUT);
   pinMode(PIN_LED_GREEN, OUTPUT);
   pinMode(PIN_LED_BLUE, OUTPUT);

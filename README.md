@@ -43,6 +43,7 @@ If you can't navigate to [http://hallwaymonitor](http://hallwaymonitor) then it 
 | /restart | POST | | Restart the device |
 | /forgetwifi | POST | | Clear the WiFi access point settings and restart the device |
 | /setwifi | POST | (string) wifiSSID<br/>(string) wifiPassword | Update the access point and restarts the device |
+| /setnightlighton | POST | (boolean) on | Set wither the nightlight is on or off |
 
 ## TODO
 - Implement Multiple WiFi access point configuration

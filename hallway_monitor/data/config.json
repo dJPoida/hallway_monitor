@@ -1,0 +1,8 @@
+{
+    "ssid": "ELDROIDZ-REAR",
+    "password": "pkmj4eva",
+    "iftttEnabled": false,
+    "iftttServer": "maker.ifttt.com",
+    "iftttEndpoint": "/trigger/maddie_spotted/with/key/c3nx5tMYazgNfI7rHTRS4y",
+    "nightlightOn": false
+}

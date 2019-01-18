@@ -11,28 +11,28 @@
 AsyncWebServer server(serverPort);
 
 
+
 /**
- * TODO: Complete this function
- * Handles requests that cannot be bound to endpoints
+ * Handles setting the nightlight on or off
  */
-void handleNotFound(){
-//  Serial.print("WebServer: Client accessed unknown path '");
-//  Serial.print(server.uri());
-//  Serial.println("'");
-//
-//  String message = "File Not Found\n\n";
-//  message += "URI: ";
-//  message += server.uri();
-//  message += "\nMethod: ";
-//  message += (server.method() == HTTP_GET)?"GET":"POST";
-//  message += "\nArguments: ";
-//  message += server.args();
-//  message += "\n";
-//  for (uint8_t i=0; i<server.args(); i++){
-//    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-//  }
-//  server.send(404, "text/plain", message);
+void handleSetNightlightOn(AsyncWebServerRequest *request){
+  const boolean newOn = request->getParam("on")->value() == "true";
+  setNightlightOn(newOn);
+  
+  request->send(200, "text/json", "{\"success\":true}");
 }
+
+
+
+/**
+ * Handles restarting the device
+ */
+void handleRestart(AsyncWebServerRequest *request){
+    request->send(200, "text/json", "{\"success\":true}");
+    delay(1000);
+    resetDevice();
+}
+
 
 
 /**
@@ -107,6 +107,8 @@ String getMimeType(const String& fileName){
     return "text/css";
   } else if (fileName.endsWith(".js")) {
     return "text/javascript";
+  } else if (fileName.endsWith(".svg")) {
+    return "image/svg+xml";
   }
   return "text/plain";
 }
@@ -132,14 +134,12 @@ boolean initWebServer() {
   }
 
   // Restart the device
-  server.on("/restart", HTTP_POST, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", "Cool. Restarting...");
-    delay(100);
-    resetDevice();
+  server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleRestart(request);
   });
 
   // Forget the current wifi configuration and restart the device
-  server.on("/forgetwifi", HTTP_POST, [](AsyncWebServerRequest *request){
+  server.on("/forgetwifi", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", "Cool. I'll forget the curret wifi settings. Rebooting...");
     delay(100);
     const char* newSSID = "";
@@ -148,7 +148,7 @@ boolean initWebServer() {
   });
 
   // Set the wifi access point details
-  server.on("/setwifi", HTTP_POST, [](AsyncWebServerRequest *request){
+  server.on("/setwifi", HTTP_GET, [](AsyncWebServerRequest *request){
     const char* newSSID = request->arg("wifiSSID").c_str();
     const char* newPassword = request->arg("wifiPassword").c_str();
 
@@ -158,6 +158,11 @@ boolean initWebServer() {
     setWiFiSettings(newSSID, newPassword);
   });
 
+  // Set the wifi access point details
+  server.on("/setnightlighton", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleSetNightlightOn(request);
+  });
+  
   //server.on("/rgb", HTTP_GET, handleRGB);
 
   // All other Files / Routes

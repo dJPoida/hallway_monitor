@@ -1,0 +1,21 @@
+@import "mini_css";
+@import "switch";
+
+body {
+    text-align: center;
+}
+
+div.title {
+    .logo {
+        padding: 1em;
+        img {
+            max-width: 30vw;
+        }
+    }
+}
+
+.switchWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

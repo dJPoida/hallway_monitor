@@ -21,6 +21,7 @@ char*   iftttEndpoint = "";                   // The ifttt Endpoint (something l
 
 // Hardware Config
 bool sensorEnabled = false;                   // Whether or not the sensor is enabled
+bool nightlightOn = false;                    // Whether the nightlight is currently on or not
 
 // Defaults
 const boolean defaultLED_R = 255;
@@ -62,6 +63,9 @@ boolean loadConfig() {
   StaticJsonBuffer<200> jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(buf.get());
 
+  //Close the file before we corrupt it.
+  configFile.close();
+
   if (!json.success()) {
     Serial.println("Failed to parse config file");
     return false;
@@ -72,12 +76,14 @@ boolean loadConfig() {
   const boolean newIFTTTEnabled = json["iftttEnabled"];
   const char* newIFTTTServer = json["iftttServer"];
   const char* newIFTTTEndpoint = json["iftttEndpoint"];
+  const boolean newNightlightOn = json["nightlightOn"];
 
   ssid = const_cast<char*> (newSSID);
   password = const_cast<char*> (newPassword);
   iftttEnabled = newIFTTTEnabled;
   iftttServer = const_cast<char*> (newIFTTTServer);
   iftttEndpoint = const_cast<char*> (newIFTTTEndpoint);
+  nightlightOn = newNightlightOn;
   
   Serial.print("Config Loaded from SPIFFS: ");
   Serial.print(" - WiFi SSID: ");
@@ -90,6 +96,8 @@ boolean loadConfig() {
   Serial.println(iftttServer);
   Serial.print(" - iftttEndpoint: ");
   Serial.println(iftttEndpoint);
+  Serial.print(" - Night Light On: ");
+  Serial.println(nightlightOn);
   
   return true;
 }
@@ -108,6 +116,7 @@ bool saveConfig() {
   json["iftttEnabled"] = iftttEnabled;
   json["iftttServer"] = iftttServer;
   json["iftttEndpoint"] = iftttEndpoint;
+  json["nightlightOn"] = nightlightOn;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -117,10 +126,13 @@ bool saveConfig() {
 
   json.printTo(configFile);
 
+  configFile.close();
   Serial.println("Successfully saved configuration file.");
   
   return true;
 }
+
+
 
 /**
  * Change the currrent Wifi Settings (triggered from the Configuration Webistes
