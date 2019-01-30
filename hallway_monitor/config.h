@@ -10,29 +10,31 @@
 const char* apssid          = "Hallway Monitor";  // The SSID when the device is running in Access Point mode
 const char* mdnsAddress     = "hallway-monitor";  // The address that clients can use to connect to the device without the IP (i.e. http://hallway-monitor.local)
 const char* networkHostname = "HallwayMonitor";   // The Hostname to display when other devices on the network want to identify this device
-char*       ssid            = "";                 // The WiFi accesspoint to connect to (this is loaded from SPIFFS)
-char*       password        = "";                 // The WiFi accesspoint password (this is loaded from SPIFFS)
+String      ssid            = "";                 // The WiFi accesspoint to connect to (this is loaded from SPIFFS)
+String      password        = "";                 // The WiFi accesspoint password (this is loaded from SPIFFS)
 int         serverPort      = 80;                 // The Port to run the server on (this is the default and after initial config is loaded from SPIFFS)
 
 // IFTTT Details (If This Then That)
-boolean iftttEnabled  = false;                // Whether the ifttt integration is enabled
-char*   iftttServer   = "";                   // The ifttt Server address (typically "maker.ifttt.com")
-char*   iftttEndpoint = "";                   // The ifttt Endpoint (something like "/trigger/maddie_spotted/with/key/yourkeyhere")
+boolean     iftttEnabled   = false;               // Whether the ifttt integration is enabled
+String      iftttServer    = "";                  // The ifttt Server address (typically "maker.ifttt.com")
+String      iftttEndpoint  = "";                  // The ifttt Endpoint (something like "/trigger/maddie_spotted/with/key/yourkeyhere")
 
 // Hardware Config
-bool sensorEnabled = false;                   // Whether or not the sensor is enabled
-bool nightlightOn = false;                    // Whether the nightlight is currently on or not
+bool        sensorEnabled = false;                // Whether or not the sensor is enabled
+bool        nightlightOn = false;                 // Whether the nightlight is currently on or not
 
-// Defaults
-const boolean defaultLED_R = 255;
-const boolean defaultLED_G = 255;
-const boolean defaultLED_B = 255;
+// LED States
+byte        LED_R = 255;                          // The R Color Value of the Nightlight
+byte        LED_G = 255;                          // The G Color Value of the Nightlight
+byte        LED_B = 255;                          // The B Color Value of the Nightlight
 
 // In the event that you stuff up your resister calculation (like I did) you can use these values between 0.0 and 1.0 to offset the RGB leds to get more natural colours
 const double redBias = 0.2;
 const double greenBias = 1.0;
 const double blueBias = 1.0;
 
+// Globals
+bool writingConfig = false;                   // Keeps track of whether the config is being written at the moment
 
 
 /**
@@ -60,7 +62,7 @@ boolean loadConfig() {
   // use configFile.readString instead.
   configFile.readBytes(buf.get(), size);
 
-  StaticJsonBuffer<200> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(buf.get());
 
   //Close the file before we corrupt it.
@@ -71,21 +73,17 @@ boolean loadConfig() {
     return false;
   }
 
-  const char* newSSID = json["ssid"];
-  const char* newPassword = json["password"];
-  const boolean newIFTTTEnabled = json["iftttEnabled"];
-  const char* newIFTTTServer = json["iftttServer"];
-  const char* newIFTTTEndpoint = json["iftttEndpoint"];
-  const boolean newNightlightOn = json["nightlightOn"];
-
-  ssid = const_cast<char*> (newSSID);
-  password = const_cast<char*> (newPassword);
-  iftttEnabled = newIFTTTEnabled;
-  iftttServer = const_cast<char*> (newIFTTTServer);
-  iftttEndpoint = const_cast<char*> (newIFTTTEndpoint);
-  nightlightOn = newNightlightOn;
-  
-  Serial.print("Config Loaded from SPIFFS: ");
+  ssid = json.get<String>("ssid");
+  password = json.get<String>("password");
+  iftttEnabled = json.get<bool>("iftttEnabled");
+  iftttServer = json.get<String>("iftttServer");
+  iftttEndpoint = json.get<String>("iftttEndpoint");
+  nightlightOn = json.get<bool>("nightlightOn");
+  LED_R = json.get<byte>("r");
+  LED_G = json.get<byte>("g");
+  LED_B = json.get<byte>("b");
+    
+  Serial.println("Config Loaded from SPIFFS: ");
   Serial.print(" - WiFi SSID: ");
   Serial.println(ssid);
   Serial.print(" - WiFi Password: ");
@@ -107,16 +105,25 @@ boolean loadConfig() {
  * Save the current configuration to SPIFFS
  */
 bool saveConfig() {
+  // Wait for any current write operations to finish
+  while (writingConfig) {
+    delay(1);
+  };
+  
+  writingConfig = true;
   Serial.println("Writing settings to configuration file...");
 
-  StaticJsonBuffer<200> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.createObject();
-  json["ssid"] = ssid;
-  json["password"] = password;
+  json["ssid"] = ssid ? ssid : "";
+  json["password"] = password ? password : "";
   json["iftttEnabled"] = iftttEnabled;
   json["iftttServer"] = iftttServer;
   json["iftttEndpoint"] = iftttEndpoint;
   json["nightlightOn"] = nightlightOn;
+  json["r"] = LED_R;
+  json["g"] = LED_G;
+  json["b"] = LED_B;
 
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
@@ -124,10 +131,16 @@ bool saveConfig() {
     return false;
   }
 
+  // Debug
+  String jsonData;
+  json.printTo(jsonData);
+  Serial.print("JSON: ");
+  Serial.println(jsonData);
+  
   json.printTo(configFile);
-
   configFile.close();
-  Serial.println("Successfully saved configuration file.");
+  
+  writingConfig = false;
   
   return true;
 }
@@ -136,27 +149,29 @@ bool saveConfig() {
 
 /**
  * Change the currrent Wifi Settings (triggered from the Configuration Webistes
- * @var char* newSSID the new WiFi SSID to save to the device
- * @var char* newPassword the new WiFi Password to save to the device
+ * @var String newSSID the new WiFi SSID to save to the device
+ * @var String newPassword the new WiFi Password to save to the device
  */
-void setWiFiSettings(const char* newSSID, const char* newPassword) {
-    Serial.print("Configuring and saving new WiFi Hotspot details, SSID: '");
-    Serial.print(newSSID);
-    Serial.print("', Password: '");
-    Serial.print(newPassword);
-    Serial.print("'...");
+void setWiFiSettings(String newSSID, String newPassword) {
+    Serial.println(newSSID);
+    Serial.println(newPassword);
 
-    ssid = const_cast<char*> (newSSID);
-    password = const_cast<char*> (newPassword);
+    ssid = newSSID;
+    password = newPassword;
+
+    Serial.print("Configuring and saving new WiFi Hotspot details, SSID: '");
+    Serial.print(ssid);
+    Serial.print("', Password: '");
+    Serial.print(password);
+    Serial.println("'...");
 
     // Save the updated config.
     saveConfig();
 
-    Serial.println(" done.");
     Serial.println("restarting...");
 
     // Reset the device
-    resetDevice();
+    flagReset();
 }
 
 #endif

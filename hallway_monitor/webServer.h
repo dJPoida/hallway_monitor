@@ -25,40 +25,14 @@ void handleSetNightlightOn(AsyncWebServerRequest *request){
 
 
 /**
- * Handles restarting the device
- */
-void handleRestart(AsyncWebServerRequest *request){
-    request->send(200, "text/json", "{\"success\":true}");
-    delay(1000);
-    resetDevice();
-}
-
-
-
-/**
- * TODO: Complete this
  * Specifically handle requests to change the RGB values of the nightlight
  */
-void handleRGB() {
-//  byte r = 0;
-//  byte g = 0;
-//  byte b = 0;
-//  
-//  for (int i = 0; i < server.args(); i++) {
-//    if (server.argName(i) == "r") {
-//      r = server.arg(i).toInt();
-//    }
-//    
-//    if (server.argName(i) == "g") {
-//      g = server.arg(i).toInt();
-//    }
-//
-//    if (server.argName(i) == "b") {
-//      b = server.arg(i).toInt();
-//    }
-//  } 
-//
-//  // Debug
+void handleSetNightlightRGB(AsyncWebServerRequest *request) {
+  byte r = request->getParam("r")->value().toInt();
+  byte g = request->getParam("g")->value().toInt();
+  byte b = request->getParam("b")->value().toInt();
+  
+  // Debug
 //  Serial.print("WebServer: RGB Change Request to RGB(");
 //  Serial.print(r);
 //  Serial.print(", ");
@@ -66,12 +40,48 @@ void handleRGB() {
 //  Serial.print(", ");
 //  Serial.print(b);
 //  Serial.println(")");
-//
-//  // Request the change to the LED
-//  setLEDColor(r, g, b);
-//  
-//  server.send(200, "text/plain", "OK");       //Response to the HTTP 
+
+  // Request the change to the LED
+  setLEDColor(r, g, b);
+
+  request->send(200, "text/json", "{\"success\":true}");
 }
+
+
+
+/**
+ * Handles restarting the device
+ */
+void handleRestart(AsyncWebServerRequest *request){
+    flagReset();
+    request->send(200, "text/json", "{\"success\":true}");
+}
+
+
+
+/**
+ * Handles forgetting the current WiFi details
+ */
+void handleForgetWiFi(AsyncWebServerRequest *request){
+    setWiFiSettings("", "");
+    
+    request->send(200, "text/json", "{\"success\":true}");
+}
+
+
+
+/**
+ * Handles setting new WiFi connection details
+ */
+void handleSetWiFi(AsyncWebServerRequest *request){
+    AsyncWebParameter* newSSID = request->getParam("wifiSSID");
+    AsyncWebParameter* newPassword = request->getParam("wifiPassword");
+    
+    setWiFiSettings(newSSID->value(), newPassword->value());
+    
+    request->send(200, "text/json", "{\"success\":true}");
+}
+
 
 
 /**
@@ -140,22 +150,12 @@ boolean initWebServer() {
 
   // Forget the current wifi configuration and restart the device
   server.on("/forgetwifi", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", "Cool. I'll forget the curret wifi settings. Rebooting...");
-    delay(100);
-    const char* newSSID = "";
-    const char* newPassword = "";
-    setWiFiSettings(newSSID, newPassword);
+    handleForgetWiFi(request);
   });
 
   // Set the wifi access point details
   server.on("/setwifi", HTTP_GET, [](AsyncWebServerRequest *request){
-    const char* newSSID = request->arg("wifiSSID").c_str();
-    const char* newPassword = request->arg("wifiPassword").c_str();
-
-    request->send(200, "text/plain", "Cool. Updating the WiFi config and Re-booting to check the settings out...");
-    delay(100);
-
-    setWiFiSettings(newSSID, newPassword);
+    handleSetWiFi(request);
   });
 
   // Set the wifi access point details
@@ -163,7 +163,10 @@ boolean initWebServer() {
     handleSetNightlightOn(request);
   });
   
-  //server.on("/rgb", HTTP_GET, handleRGB);
+  // Set the wifi access point details
+  server.on("/setnightlightrgb", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleSetNightlightRGB(request);
+  });
 
   // All other Files / Routes
   server.onNotFound([](AsyncWebServerRequest *request){
@@ -171,6 +174,11 @@ boolean initWebServer() {
     if ((request->method() == HTTP_GET) && SPIFFS.exists(request->url())) {
       request->send(SPIFFS, request->url(), getMimeType(request->url()));
     } 
+
+    // Handle HTTP_OPTIONS
+    else if (request->method() == HTTP_OPTIONS) {
+      request->send(200);
+    }
 
     // Return a 404
     else {
@@ -181,7 +189,10 @@ boolean initWebServer() {
       request->send(404, "text/plain", "The content you are looking for was not found.");
     }
   });
- 
+
+  // Some default headers for handling CORS problems in javascript
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  
   server.begin();
   Serial.print("HTTP server started on port ");
   Serial.println(serverPort);

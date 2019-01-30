@@ -2,14 +2,36 @@
 #define RESET_H
 
 #include "pins.h"
+#include "FS.h"
+
+bool resetFlag = false; // Flag to tell the kernel it's time for a reset
+
+
 
 /**
  * Resets the device by pulling the reset pin high
  */
 void resetDevice() {
   Serial.println("Restarting device...");
-  digitalWrite(PIN_RESET, LOW);
-  delay(5000);
+  SPIFFS.end();
+  delay(200);
+
+  // From https://github.com/esp8266/Arduino/issues/1722#issuecomment-321818357
+  WiFi.forceSleepBegin();
+  //wdt_reset();
+  ESP.restart();
+  //while(1) {
+  //  wdt_reset();
+  //}
+  //ESP.reset();
+}
+
+
+/**
+ * Flags the kernal down for a reset
+ */
+void flagReset() {
+  resetFlag = true;
 }
 
 
@@ -19,9 +41,8 @@ void resetDevice() {
  * @returns boolean whether the init was successful
  */
 bool initReset() {
-    pinMode(PIN_RESET, OUTPUT);
-    digitalWrite(PIN_RESET, HIGH);
-    return true;
+  resetFlag = false;
+  return true;
 }
 
 #endif

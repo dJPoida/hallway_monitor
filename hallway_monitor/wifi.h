@@ -15,10 +15,10 @@ boolean initWifi() {
     WiFi.hostname(networkHostname);
     
     // Don't bother if we don't have a configuration yet
-    if (ssid != "") {
+    if (!ssid.equals("")) {
       Serial.print("Connecting to: "); 
       Serial.print(ssid);
-      WiFi.begin(ssid, password);  
+      WiFi.begin(ssid.c_str(), password.c_str());  
     
       int timeout = 10 * 4; // 10 seconds
       while(WiFi.status() != WL_CONNECTED  && (timeout-- > 0)) {

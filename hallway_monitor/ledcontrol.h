@@ -11,6 +11,25 @@ const long flashInterval = 1000;
 
 
 /**
+/ Write the current LED state to the LED Pins
+*/
+void updateLED() {
+  int offsetR = (1023 - map(LED_R, 0, 255, 0, (int)(1023 * redBias)));
+  int offsetG = (1023 - map(LED_G, 0, 255, 0, (int)(1023 * greenBias)));
+  int offsetB = (1023 - map(LED_B, 0, 255, 0, (int)(1023 * blueBias)));
+
+  // Write the Analog Values to the Pins
+  analogWrite(PIN_LED_RED, offsetR);
+  analogWrite(PIN_LED_GREEN, offsetG);
+  analogWrite(PIN_LED_BLUE, offsetB);
+  
+  // Ensure the LEDs are powered (if required)
+  digitalWrite(PIN_LED_POWER, accessPointMode ? flashStateOn : nightlightOn);  
+}
+
+
+
+/**
  * Set the LED to a specific RGB color
  * 
  * @param byte r the red value (0-255)
@@ -18,19 +37,13 @@ const long flashInterval = 1000;
  * @param byte b the blue value (0-255) 
  */
 void setLEDColor(byte r, byte g, byte b) {
+  LED_R = r;
+  LED_G = g;
+  LED_B = b;
 
-  int offsetR = (1023 - map(r, 0, 255, 0, (int)(1023 * redBias)));
-  int offsetG = (1023 - map(g, 0, 255, 0, (int)(1023 * greenBias)));
-  int offsetB = (1023 - map(b, 0, 255, 0, (int)(1023 * blueBias)));
-
-  // Write the Analog Values to the Pins
-  analogWrite(PIN_LED_RED, offsetR);
-  analogWrite(PIN_LED_GREEN, offsetG);
-  analogWrite(PIN_LED_BLUE, offsetB);
-  
-  // Ensure the LEDs are powered
-  digitalWrite(PIN_LED_POWER, HIGH);
+  updateLED();
 }
+
 
 
 /**
@@ -42,11 +55,13 @@ void handleFlashAPModeLED() {
     previousFlashMillis = currentMillis;   
     if (flashStateOn == false) {
       flashStateOn = true;
-      setLEDColor(255, 0, 0);
+      LED_R = 255;
+      LED_G = 0;
+      LED_B = 0;
     } else {
       flashStateOn = false;
-      digitalWrite(PIN_LED_POWER, LOW);
     }
+    updateLED();
   }
 }
 
@@ -59,13 +74,14 @@ void handleFlashAPModeLED() {
 void setNightlightOn(boolean newOn) {
     Serial.print("Setting the nightlight to: '");
     if (newOn) {
-      Serial.println("ON");
+      Serial.println("ON'");
     } else {
-      Serial.println("OFF");
+      Serial.println("OFF'");
     }
 
     nightlightOn = newOn;
-    digitalWrite(PIN_LED_POWER, nightlightOn);
+
+    updateLED();
 
     // Save the updated config.
     saveConfig();
@@ -79,12 +95,12 @@ void setNightlightOn(boolean newOn) {
  */
 boolean initLED() {
   pinMode(PIN_LED_POWER, OUTPUT);
-  digitalWrite(PIN_LED_POWER, nightlightOn);
   pinMode(PIN_LED_RED, OUTPUT);
   pinMode(PIN_LED_GREEN, OUTPUT);
   pinMode(PIN_LED_BLUE, OUTPUT);
 
-  // TODO: somekind of check to see if the LED was actually initialised
+  updateLED();
+  
   return true;
 }
 

@@ -94,6 +94,11 @@ void setup() {
  * Application Loop
  */
 void loop() {
+  // Has something requested a reset?
+  if (resetFlag) {
+    resetDevice();
+  }
+
   // Don't perform these operations in hotSpotMode
   if (!accessPointMode) {
     // Check to see if the alarm has been triggered
@@ -104,6 +109,8 @@ void loop() {
     // Flash the LEDs to indicate the device is in configuration mode
     handleFlashAPModeLED();
   }
+
+  delay(1);
 }
 
 
@@ -128,7 +135,7 @@ void makeIFTTTRequest() {
     
     WiFiClient client;
     int retries = 5;
-    while(!!!client.connect(iftttServer, 80) && (retries-- > 0)) {
+    while(!!!client.connect(iftttServer.c_str(), 80) && (retries-- > 0)) {
       Serial.print(".");
     }
     Serial.println();
@@ -137,7 +144,7 @@ void makeIFTTTRequest() {
     }
     
     Serial.print("Request resource: "); 
-    Serial.println(iftttEndpoint);
+    Serial.println(iftttEndpoint.c_str());
     client.print(String("GET ") + iftttEndpoint + 
                     " HTTP/1.1\r\n" +
                     "Host: " + iftttServer + "\r\n" + 

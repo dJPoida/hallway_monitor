@@ -1,21 +1,68 @@
 @import "mini_css";
 @import "switch";
+@import "color_picker";
+
+:root {
+    --color-danger: #cc3333;
+    --color-warning: #ccaa33;
+    --color-success: #33aa33;
+}
 
 body {
     text-align: center;
 }
 
-div.title {
+header {    
+    height: 5rem;
+    padding: var(--universal-margin) calc(var(--universal-margin)*4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+
     .logo {
-        padding: 1em;
+        position: relative;
+        display: flex;
+        height: calc(100% - var(--universal-padding) * 3);
+        padding: 0;
+
         img {
-            max-width: 30vw;
+            height: 100%;
+            width: auto;
         }
     }
+
+    .title {
+        margin-left: var(--universal-margin);
+        h1 {
+            margin: 0;
+            padding: 0;
+        }
+    }
+}
+
+section {
+    margin: calc(var(--universal-margin)*4);
 }
 
 .switchWrapper {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.setting-label-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.setting-value-wrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.spacer {
+    height: calc(var(--universal-margin)*4);
 }

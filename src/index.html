@@ -9,52 +9,127 @@
   <meta name="description" content="Hallway Monitor Control Page">
   <meta name="author" content="Peter Eldred">
 
-  <link rel="stylesheet" href="/css/vendor/mini-dark.min.css?v=1.0">
+  <link rel="stylesheet" href="/css/mini-dark.min.css?v=1.0">
   <link rel="stylesheet" href="/css/hallwaymonitor.css?v=1.0">
   <link rel="manifest" href="/manifest.json">
 
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-  <link rel="icon" type="image/png" href="/img/icon/favicon-16x16.png" sizes="16x16">
-  <link rel="icon" type="image/png" href="/img/icon/favicon-32x32.png" sizes="32x32">
-  <link rel="icon" type="image/png" href="/img/icon/pwa-192x192.png" sizes="192x192">
-  <link rel="icon" type="image/png" href="/img/icon/pwa-512x512.png" sizes="512x512">
-  <link rel="apple-touch-icon" href="/img/icon/apple-touch-icon-180x180.png" sizes="180x180">
-  <meta name="msapplication-config" content="/img/icon/browserconfig.xml">
+  <link rel="icon" type="image/png" href="/img/favicon-16x16.png" sizes="16x16">
+  <link rel="icon" type="image/png" href="/img/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/img/pwa-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/img/pwa-512x512.png" sizes="512x512">
+  <link rel="apple-touch-icon" href="/img/touch-180x180.png" sizes="180x180">
+  <meta name="msapplication-config" content="/img/browserconfig.xml">
   
 </head>
 
 <body>
-    <div class="title">
+    <!-- Page Title -->
+    <header>
         <div class="logo" href="#">
             <img src="/img/monkey.svg">
         </div>
-        <div class="heading">
+        <div class="title">
             <h1>Hallway Monitor</h1>
-            <h4>(aka Cheeky Monkey Detector)</h4>
         </div>
-    </div>
-    <div>
-        <h2>Night Light</h2>
-    </div>
-    <div class="switchWrapper">
-        <div class="onoffswitch">
-            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch_nightlight" checked>
-            <label class="onoffswitch-label" for="switch_nightlight">
-                <span class="onoffswitch-inner"></span>
-                <span class="onoffswitch-switch"></span>
-            </label>
+    </header>
+
+    <!-- Night Light Control -->
+    <section>
+        <h3>💡 Night Light Colour</h3>
+        <div class="row responsive-label">
+            <div class="col-sm-4 setting-label-wrapper">
+                <div class="switchWrapper">
+                    <div class="onoffswitch">
+                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch_nightlight" checked>
+                        <label class="onoffswitch-label" for="switch_nightlight">
+                            <span class="onoffswitch-inner"></span>
+                            <span class="onoffswitch-switch"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8 setting-value-wrapper">
+                    <div class="colorPicker">
+                    <input id="input_color" value="#54aedb">
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
     <hr/>
 
-    <div>
-        <h2>Admin</h2>
-    </div>
-    <div>
-        <button id="button_restart">Restart</button>
-        <button id="button_forget_wifi">Forget WiFi</button>
-    </div>
+    <!-- Settings Section -->
+    <section>
+        <h3>🚨 Cheeky Monkey Alarm</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="switchWrapper">
+                    <div class="onoffswitch alarm-switch">
+                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch_alarm_armed" checked>
+                        <label class="onoffswitch-label" for="switch_alarm_armed">
+                            <span class="onoffswitch-inner"></span>
+                            <span class="onoffswitch-switch"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="spacer"></div>
+        <div class="row">
+            <div class="col-sm-12">
+                <fieldset>
+                    <legend>Push Notifications to IFTTT</legend>
+                    <div class="row responsive-label">
+                        <div class="col-sm-4 setting-label-wrapper">
+                            <label for="iftttEnabled">Enabled</label>
+                        </div>
+                        <div class="col-sm-8 setting-value-wrapper">
+                            <input type="checkbox" id="input_ifttt_enabled" name="iftttEnabled"/>
+                        </div>
+                    </div>
+                    <div class="row responsive-label">
+                        <div class="col-sm-4 setting-label-wrapper">
+                            <label for="iftttServer">Server</label>
+                        </div>
+                        <div class="col-sm-8 setting-value-wrapper">
+                            <input type="text" id="input_ifttt_server" name="iftttServer" placeholder="i.e. maker.ifttt.com"/>
+                        </div>
+                    </div>
+                    <div class="row responsive-label">
+                        <div class="col-sm-4 setting-label-wrapper">
+                            <label for="wifiPassword">Endpoint</label>
+                        </div>
+                        <div class="col-sm-8 setting-value-wrapper">
+                            <input type="text" id="input_ifttt_endpoint" name="iftttEndpoint" placeholder="/trigger/xxxxx/with/key/xxxxx"/>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </section>
+
+    <hr/>
+
+    <!-- Admin Section -->
+    <section>
+        <div>
+            <h3>🕵️ Admin</h3>
+        </div>
+        <div>
+            <button id="button_restart">Restart</button>
+            <button id="button_forget_wifi">Forget WiFi</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <h4>Hallway Monitor</h4>
+        <h5>(aka Cheeky Monkey Detector)</h5>
+        <p>2019 - dJPoida / Peter Eldred</p>
+        <a href="https://github.com/dJPoida/hallway_monitor">View it on Github</p>
+        <a href="https://ifttt.com/maker_webhooks" target="_blank">🛈 IFTTT Maker Webhooks</a>
+    </footer>
 
     <!-- Dialog: Restart -->
     <input type="checkbox" id="modal_restart" class="modal">
@@ -86,8 +161,9 @@
         </div>
     </div>
 
-    <script src="/js/vendor/jquery-3.3.1.min.js"></script>
-    <script src="/js/globals.js"></script>
-    <script src="/js/index.js"></script>
+    <script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/js/kcp.min.js"></script>
+    <script type="text/javascript" src="/js/globals.js"></script>
+    <script type="text/javascript" src="/js/index.js"></script>
 </body>
 </html>
