@@ -1,11 +1,12 @@
+[type="checkbox"].modal + div .card {
+  max-height: 80vh; }
+
 .onoffswitch {
   position: relative;
-  width: 90px;
+  width: 100px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none; }
-  .onoffswitch.alarm-switch {
-    width: 120px; }
 
 .onoffswitch-checkbox {
   display: none; }
@@ -62,12 +63,10 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  right: 56px;
+  right: 66px;
   border: 2px solid #999999;
   border-radius: 20px;
   transition: all 0.3s ease-in 0s; }
-  .alarm-switch .onoffswitch-switch {
-    right: 86px; }
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
   margin-left: 0; }
@@ -103,7 +102,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: relative; }
+  position: relative;
+  white-space: normal; }
   header .logo {
     position: relative;
     display: flex;
@@ -113,7 +113,8 @@ header {
       height: 100%;
       width: auto; }
   header .title {
-    margin-left: var(--universal-margin); }
+    margin-left: var(--universal-margin);
+    text-align: right; }
     header .title h1 {
       margin: 0;
       padding: 0; }
@@ -138,3 +139,13 @@ section {
 
 .spacer {
   height: calc(var(--universal-margin)*4); }
+
+input[type="text"] {
+  width: 100%; }
+
+.nightlight-color-indicator {
+  height: 4em;
+  width: 4em;
+  border-radius: 0.5em;
+  background-color: grey;
+  border: 1px solid #fff; }

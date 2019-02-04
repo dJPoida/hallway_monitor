@@ -1,1 +1,5 @@
 // Mini CSS Overrides
+[type="checkbox"].modal+div .card {
+    // Increase the max height of a modal
+    max-height: 80vh;
+}

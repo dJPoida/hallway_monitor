@@ -33,4 +33,23 @@ boolean initSensor() {
   return true;
 }
 
+
+
+/**
+ * Enable or disable the sensor (arm the alarm)
+ * @var boolean newSensorEnabled whether the sensor should be enabled or not
+ */
+void setSensorEnabled(boolean newSensorEnabled) {
+    if (newSensorEnabled) {
+      Serial.println("Arming the Motion Sensor");
+    } else {
+      Serial.println("Disarming the Motion Sensor");
+    }
+
+    sensorEnabled = newSensorEnabled;
+
+    // Save the updated config.
+    saveConfig();
+}
+
 #endif

@@ -3,50 +3,81 @@
 // Globals
 const deviceURL = (typeof overrideDeviceURL !== "undefined") ? overrideDeviceURL : "/";
 const setColorUpdateInterval = 100;
+var _initialised = false;
 var colorPicker = undefined;
+var originalColorPickerColor = undefined;
+var config = {};
 
 // Scrape the HTML for elements
 const $nightLightToggle = $('#switch_nightlight');
+const $alarmArmedToggle = $('#switch_alarm_armed');
+const $nightlightColorIndicator = $('#indicator_night_light_color');
+const $nightlightColorPickerCancelButton = $('#button_set_nightlight_color_cancel');
+const $nightlightColorPickerSaveButton = $('#button_set_nightlight_color_save');
 const $restartButton = $('#button_restart');
 const $restartButtonCancel = $('#button_restart_cancel');
 const $restartButtonConfirm = $('#button_restart_confirm');
 const $forgetWiFiButton = $('#button_forget_wifi');
 const $forgetWiFiButtonCancel = $('#button_forget_wifi_cancel');
 const $forgetWiFiButtonConfirm = $('#button_forget_Wifi_confirm');
-const $nightLightColorInput = $('#input_color')
+
+
+
+/**
+ * Simple mechanism to know when we were able to connect to the device
+ * Pretty lazy, but it works until Sockets is built in.
+ */
+initialised = function() {
+    if (!_initialised){
+        _initialised = true;
+        showModal('modal_connecting', false);
+    }
+}
 
 
 /**
  * Bind all of the events required to drive the control panel
  */
 bindEvents = function() {
-    var self = this;
-
     // Nightlight On/Off
-    $nightLightToggle.on('change', function() {
-        let newState = $(this).is(":checked");
-        self.setNightLightOn(newState);
+    $nightLightToggle.on('change', (event) => {
+        let newState = $(event.currentTarget).is(":checked");
+        setNightLightOn(newState);
     });
+
+    // Nightlight Color Selection
+    $nightlightColorIndicator.on('click', () => {
+        originalColorPickerColor = colorPicker.getCurColorHex();
+        showModal('modal_set_nightlight_color', true);
+    })
+    $nightlightColorPickerCancelButton.on('click', () => {
+        colorPicker.setColorByHex(originalColorPickerColor);
+        showModal('modal_set_nightlight_color', false);
+    });
+    $nightlightColorPickerSaveButton.on('click', () => {
+        showModal('modal_set_nightlight_color', false);
+    });
+    
 
     // Restart Button
-    $restartButton.on('click', function() {
+    $restartButton.on('click', () => {
         showModal('modal_restart', true);
     });
-    $restartButtonCancel.on('click', function() {
+    $restartButtonCancel.on('click', () => {
         showModal('modal_restart', false);
     });
-    $restartButtonConfirm.on('click', function() {
+    $restartButtonConfirm.on('click', () => {
         restart();
     });
 
     // Forget Wifi Button
-    $forgetWiFiButton.on('click', function() {
+    $forgetWiFiButton.on('click', () => {
         showModal('modal_forget_wifi', true);
     });
-    $forgetWiFiButtonCancel.on('click', function() {
+    $forgetWiFiButtonCancel.on('click', () => {
         showModal('modal_forget_wifi', false);
     });
-    $forgetWiFiButtonConfirm.on('click', function() {
+    $forgetWiFiButtonConfirm.on('click', () => {
         forgetWiFi();
     });
 
@@ -59,7 +90,7 @@ bindEvents = function() {
  */
 initColorPicker = function() {
     colorPicker = new KellyColorPicker({
-        input : 'input_color', 
+        place : 'picker_night_light_color',
         size : 300,
         popupClass : 'color-picker-popup'
     });
@@ -104,10 +135,20 @@ autoSizeColorPicker = function() {
  * (nightlight state, color, alarm armed state etc...)
  */
 queryStates = function() {
-    //@TODO:
+    let route = deviceURL + 'config';
+    
+    let onSuccess = (response) => {
+        config = response.config;
+        updateUI();
+        initialised();
+    };
 
-    //TODO: use this to set the color picker current value
-    //colorPicker.setColorByHex('#3b8db1');
+    let onError = () => {
+        // Keep trying until we establish a connection
+        setTimeout(() => queryStates(), 500);
+    }
+
+    ajaxPost(route, undefined, 'GET', undefined, undefined, onSuccess, onError);
 }
 
 
@@ -147,7 +188,8 @@ setNightLightRGB = function(r, g, b) {
     };
 
     let onSuccess = () => {
-        // console.log('yep');
+        let nightLightColor = rgbToHex(data);
+        $nightlightColorIndicator.css('background-color', nightLightColor);
     }
     
     //@TODO: Error handling / screen waiting
@@ -164,7 +206,9 @@ restart = function() {
     let data = {};
     
     let onSuccess = () => {
-        // console.log('yep');
+        _initialised = false;
+        showModal('modal_connecting', true);
+        setTimeout(() => queryStates(), 1000);
     }
 
     let onComplete = () => {
@@ -204,6 +248,34 @@ forgetWiFi = function() {
  */
 showModal = function(modalId, state) {
     $('#' + modalId).prop('checked', state);
+}
+
+
+
+/**
+ * Update the UI to match the current state
+ */
+updateUI = function() {
+    $nightLightToggle.prop("checked", config.nightlightOn);
+    $alarmArmedToggle.prop("checked", config.sensorEnabled);
+    let nightLightColor = rgbToHex({r: config.r, g: config.g, b: config.b});
+    colorPicker.setColorByHex(nightLightColor);
+    $nightlightColorIndicator.css('background-color', nightLightColor);
+}
+
+
+
+/** 
+ * Convert a set of RGB colors to HEX
+ * @param {object} color provide color.r, color.g and color.b to convert to hex
+ */
+function rgbToHex(color) {
+    var componentToHex = function (c) {
+        var hex = c.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+    };
+
+    return "#" + componentToHex(color.r) + componentToHex(color.g) + componentToHex(color.b);
 }
 
 

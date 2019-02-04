@@ -110,6 +110,9 @@ void loop() {
     handleFlashAPModeLED();
   }
 
+  // Check so see if something wants to write to the config
+  checkLazyWriteConfig();
+
   delay(1);
 }
 

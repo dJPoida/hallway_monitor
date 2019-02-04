@@ -22,7 +22,7 @@ void updateLED() {
   analogWrite(PIN_LED_RED, offsetR);
   analogWrite(PIN_LED_GREEN, offsetG);
   analogWrite(PIN_LED_BLUE, offsetB);
-  
+
   // Ensure the LEDs are powered (if required)
   digitalWrite(PIN_LED_POWER, accessPointMode ? flashStateOn : nightlightOn);  
 }
@@ -42,6 +42,8 @@ void setLEDColor(byte r, byte g, byte b) {
   LED_B = b;
 
   updateLED();
+
+  lazyWriteConfig();
 }
 
 

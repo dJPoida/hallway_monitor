@@ -6,6 +6,7 @@
 #include "ESPAsyncWebServer.h"
 #include "config.h"
 #include "ledcontrol.h"
+#include "sensor.h"
 #include "FS.h"
 
 AsyncWebServer server(serverPort);
@@ -21,6 +22,19 @@ void handleSetNightlightOn(AsyncWebServerRequest *request){
   
   request->send(200, "text/json", "{\"success\":true}");
 }
+
+
+
+/**
+ * Handles enabling or disabling the motion sensor (arming the alarm)
+ */
+void handleSetSensorEnabled(AsyncWebServerRequest *request){
+  const boolean newSensorEnabled = request->getParam("sensorEnabled")->value() == "true";
+  setSensorEnabled(newSensorEnabled);
+  
+  request->send(200, "text/json", "{\"success\":true}");
+}
+
 
 
 
@@ -80,6 +94,50 @@ void handleSetWiFi(AsyncWebServerRequest *request){
     setWiFiSettings(newSSID->value(), newPassword->value());
     
     request->send(200, "text/json", "{\"success\":true}");
+}
+
+
+
+/**
+ * Handles setting new IFTTT Configuration Details
+ */
+void handleSetIFTTTDetails(AsyncWebServerRequest *request){
+    AsyncWebParameter* newIFTTTEnabled = request->getParam("iftttEnabled");
+    AsyncWebParameter* newIFTTTServer = request->getParam("iftttServer");
+    AsyncWebParameter* newIFTTTEndpoint = request->getParam("iftttEndpoint");
+    
+    setIFTTTSettings(newIFTTTEnabled->value() == "true", newIFTTTServer->value(), newIFTTTEndpoint->value());
+    
+    request->send(200, "text/json", "{\"success\":true}");
+}
+
+
+
+/**
+ * Handles returning the current config as a JSON response for use in the UI
+ * Best part about this is that we can just read the config file from the SPIFFS
+ * filesystem rather than building some string in the config unit because we
+ * update and write the config to that JSON on each change anyhow.
+ */
+void handleGetConfig(AsyncWebServerRequest *request){
+  File configFile = SPIFFS.open("/config.json", "r");
+  if (!configFile) {
+    Serial.println("Failed to open config file");
+    request->send(500, "text/json", "{\"success\":false; \"error\":\"Failed to open config file\"}");
+  } else {
+    // Build the struct with the "success" flag for the UI to know the AJAX call succeeded
+    String response = "{\"success\":true, \"config\":";
+    while (configFile.available()){
+        response += char(configFile.read());
+    }
+    response += "}";
+
+    // Close the file
+    configFile.close();
+
+    // Send the response
+    request->send(200, "text/json", response);
+  }    
 }
 
 
@@ -166,6 +224,11 @@ boolean initWebServer() {
   // Set the wifi access point details
   server.on("/setnightlightrgb", HTTP_GET, [](AsyncWebServerRequest *request){
     handleSetNightlightRGB(request);
+  });
+
+  // Get the current config as a JSON object
+  server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleGetConfig(request);
   });
 
   // All other Files / Routes

@@ -1,16 +1,14 @@
 // https://proto.io/freebies/onoff/
 // Tweaked by Peter Eldred to be more SCSSy
 
+$switchWidth: 100px;
+
 .onoffswitch {
     position: relative;
-    width: 90px;
+    width: $switchWidth;
     -webkit-user-select:none;
     -moz-user-select:none;
     -ms-user-select: none;
-
-    &.alarm-switch {
-        width: 120px;
-    }
 }
 
 .onoffswitch-checkbox {
@@ -68,14 +66,10 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    right: 56px;
+    right: $switchWidth - 34px;
     border: 2px solid #999999;
     border-radius: 20px;
     transition: all 0.3s ease-in 0s; 
-
-    .alarm-switch & {
-        right: 86px;
-    }
 }
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {

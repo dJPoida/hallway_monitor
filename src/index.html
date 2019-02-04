@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   
   <title>Halway Monitor</title>
   <meta name="description" content="Hallway Monitor Control Page">
@@ -36,12 +36,12 @@
 
     <!-- Night Light Control -->
     <section>
-        <h3>💡 Night Light Colour</h3>
-        <div class="row responsive-label">
-            <div class="col-sm-4 setting-label-wrapper">
+        <h3>Night Light</h3>
+        <div class="row">
+            <div class="col-sm-12">
                 <div class="switchWrapper">
                     <div class="onoffswitch">
-                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch_nightlight" checked>
+                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch_nightlight">
                         <label class="onoffswitch-label" for="switch_nightlight">
                             <span class="onoffswitch-inner"></span>
                             <span class="onoffswitch-switch"></span>
@@ -49,24 +49,44 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-8 setting-value-wrapper">
-                    <div class="colorPicker">
-                    <input id="input_color" value="#54aedb">
+        </div>
+        <div class="spacer"></div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="switchWrapper">
+                    <div id="indicator_night_light_color" class="nightlight-color-indicator"></div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Dialog: Nightlight Color -->
+    <input type="checkbox" id="modal_set_nightlight_color" class="modal">
+    <div>
+        <div class="card">
+            <label for="modal_set_nightlight_color" class="modal-close" ></label>
+            <h3 class="section">Nightlight Colour</h3>
+            <div class="section">
+                <div class="colorPicker">
+                    <canvas id="picker_night_light_color"></canvas>
+                </div>
+            </div>
+            <div class="section">
+                <button id="button_set_nightlight_color_cancel" class="secondary">Cancel</button><button id="button_set_nightlight_color_save" class="tertiary">Save</button>
+            </div>
+        </div>
+    </div>
+
     <hr/>
 
     <!-- Settings Section -->
     <section>
-        <h3>🚨 Cheeky Monkey Alarm</h3>
+        <h3>Cheeky Monkey Alarm</h3>
         <div class="row">
             <div class="col-sm-12">
                 <div class="switchWrapper">
                     <div class="onoffswitch alarm-switch">
-                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch_alarm_armed" checked>
+                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch_alarm_armed">
                         <label class="onoffswitch-label" for="switch_alarm_armed">
                             <span class="onoffswitch-inner"></span>
                             <span class="onoffswitch-switch"></span>
@@ -114,7 +134,7 @@
     <!-- Admin Section -->
     <section>
         <div>
-            <h3>🕵️ Admin</h3>
+            <h3>Admin</h3>
         </div>
         <div>
             <button id="button_restart">Restart</button>
@@ -157,6 +177,18 @@
             </div>
             <div class="section">
                 <button id="button_forget_wifi_cancel" class="secondary">Cancel</button><button id="button_forget_Wifi_confirm" class="tertiary">Hell yes.</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialog: Connecting -->
+    <input type="checkbox" id="modal_connecting" class="modal" checked="true">
+    <div>
+        <div class="card">
+            <!-- <label for="modal_connecting" class="modal-close" ></label> -->
+            <h3 class="section">Please Wait...</h3>
+            <div class="section">
+                Connecting...
             </div>
         </div>
     </div>

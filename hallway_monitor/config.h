@@ -23,10 +23,10 @@ String      iftttEndpoint  = "";                  // The ifttt Endpoint (somethi
 bool        sensorEnabled = false;                // Whether or not the sensor is enabled
 bool        nightlightOn = false;                 // Whether the nightlight is currently on or not
 
-// LED States
-byte        LED_R = 255;                          // The R Color Value of the Nightlight
-byte        LED_G = 255;                          // The G Color Value of the Nightlight
-byte        LED_B = 255;                          // The B Color Value of the Nightlight
+// LED States (these could be bytes but there's issues storing to JSON)
+int         LED_R = 255;                          // The R Color Value of the Nightlight
+int         LED_G = 255;                          // The G Color Value of the Nightlight
+int         LED_B = 255;                          // The B Color Value of the Nightlight
 
 // In the event that you stuff up your resister calculation (like I did) you can use these values between 0.0 and 1.0 to offset the RGB leds to get more natural colours
 const double redBias = 0.2;
@@ -34,7 +34,10 @@ const double greenBias = 1.0;
 const double blueBias = 1.0;
 
 // Globals
-bool writingConfig = false;                   // Keeps track of whether the config is being written at the moment
+bool writingConfig = false;                       // Keeps track of whether the config is being written at the moment
+const long lazyWriteDelay = 1000;                 // Wait this many MS to lazy write the config (useful to ensure we don't write too much consecutively)
+bool lazyWriteConfigFlag = false;                 // Flag to indicate that the config needs to be written, just not right now.
+long lastLazyWriteConfigDebounce = 0;             // Last time something wanted to lazy write to the config
 
 
 /**
@@ -79,6 +82,7 @@ boolean loadConfig() {
   iftttServer = json.get<String>("iftttServer");
   iftttEndpoint = json.get<String>("iftttEndpoint");
   nightlightOn = json.get<bool>("nightlightOn");
+  sensorEnabled = json.get<bool>("sensorEnabled");
   LED_R = json.get<byte>("r");
   LED_G = json.get<byte>("g");
   LED_B = json.get<byte>("b");
@@ -96,6 +100,14 @@ boolean loadConfig() {
   Serial.println(iftttEndpoint);
   Serial.print(" - Night Light On: ");
   Serial.println(nightlightOn);
+  Serial.print(" - Night Light R: ");
+  Serial.print(LED_R);
+  Serial.print(" G: ");
+  Serial.print(LED_G);
+  Serial.print(" B: ");
+  Serial.println(LED_B);
+  Serial.print(" - Sensor Enabled: ");
+  Serial.println(sensorEnabled);
   
   return true;
 }
@@ -110,6 +122,7 @@ bool saveConfig() {
     delay(1);
   };
   
+  lazyWriteConfigFlag = false;
   writingConfig = true;
   Serial.println("Writing settings to configuration file...");
 
@@ -121,6 +134,7 @@ bool saveConfig() {
   json["iftttServer"] = iftttServer;
   json["iftttEndpoint"] = iftttEndpoint;
   json["nightlightOn"] = nightlightOn;
+  json["sensorEnabled"] = sensorEnabled;
   json["r"] = LED_R;
   json["g"] = LED_G;
   json["b"] = LED_B;
@@ -132,10 +146,10 @@ bool saveConfig() {
   }
 
   // Debug
-  String jsonData;
-  json.printTo(jsonData);
-  Serial.print("JSON: ");
-  Serial.println(jsonData);
+  //String jsonData;
+  //json.printTo(jsonData);
+  //Serial.print("JSON: ");
+  //Serial.println(jsonData);
   
   json.printTo(configFile);
   configFile.close();
@@ -148,14 +162,11 @@ bool saveConfig() {
 
 
 /**
- * Change the currrent Wifi Settings (triggered from the Configuration Webistes
+ * Change the currrent Wifi Settings (triggered from the Configuration Webiste)
  * @var String newSSID the new WiFi SSID to save to the device
  * @var String newPassword the new WiFi Password to save to the device
  */
 void setWiFiSettings(String newSSID, String newPassword) {
-    Serial.println(newSSID);
-    Serial.println(newPassword);
-
     ssid = newSSID;
     password = newPassword;
 
@@ -172,6 +183,56 @@ void setWiFiSettings(String newSSID, String newPassword) {
 
     // Reset the device
     flagReset();
+}
+
+
+
+/**
+ * Change the currrent IFTTT Push Settings (triggered from the Configuration Webiste)
+ * @var boolean newIFTTTEnabled whether push to the IFTTT server is enabled
+ * @var String newIFTTTServer the new IFTTT Server address
+ * @var String newIFTTTEndpoint the new IFTTT Endpoint to push to 
+ */
+void setIFTTTSettings(boolean newIFTTTEnabled, String newIFTTTServer, String newIFTTTEndpoint) {
+    iftttEnabled = newIFTTTEnabled;
+    iftttServer = newIFTTTServer;
+    iftttEndpoint = newIFTTTEndpoint;
+
+    Serial.print("Configuring and saving new IFTTT configuration, iftttEnabled: '");
+    Serial.print(iftttEnabled);
+    Serial.print("', iftttServer: '");
+    Serial.print(iftttServer);
+    Serial.print("', iftttEndpoint: '");
+    Serial.print(iftttEndpoint);
+    Serial.println("'...");
+
+    // Save the updated config.
+    saveConfig();
+}
+
+
+
+/**
+ * Indicate that the config file needs to be written, but not right now.
+ */
+void lazyWriteConfig() {
+  lazyWriteConfigFlag = true;
+  lastLazyWriteConfigDebounce = millis();
+}
+
+
+
+/**
+ * Checks to see if something is wanting to write the config to SPIFFS lazily 
+ * (i.e. at the next opportunity)
+ */
+void checkLazyWriteConfig() {
+  if (lazyWriteConfigFlag) {
+    if (millis() - lastLazyWriteConfigDebounce > lazyWriteDelay) {
+      Serial.println("Lazy write config triggered");
+      saveConfig();
+    }
+  }
 }
 
 #endif

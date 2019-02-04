@@ -4,5 +4,9 @@
     "iftttEnabled": false,
     "iftttServer": "maker.ifttt.com",
     "iftttEndpoint": "/trigger/maddie_spotted/with/key/c3nx5tMYazgNfI7rHTRS4y",
-    "nightlightOn": false
+    "nightlightOn": false,
+    "sensorEnabled": false,
+    "r": 255,
+    "g": 255,
+    "b": 255
 }
