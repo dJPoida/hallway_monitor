@@ -14,6 +14,7 @@
  * 
  * Add switch color in colorsavers button (analog of X button in Photoshop)
  *
+ * @note: Slightly tweaked by dJPoida to work with webpack
  **/
 
 /**
@@ -2563,3 +2564,5 @@ KellyColorPicker.attachToInputByClass = function (className, cfg) {
 };
 
 // KellyColorPicker.dragTrigger = false;
+
+module.exports = KellyColorPicker;

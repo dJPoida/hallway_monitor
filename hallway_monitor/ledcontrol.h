@@ -14,9 +14,13 @@ const long flashInterval = 1000;
 / Write the current LED state to the LED Pins
 */
 void updateLED() {
-  int offsetR = (1023 - map(LED_R, 0, 255, 0, (int)(1023 * redBias)));
-  int offsetG = (1023 - map(LED_G, 0, 255, 0, (int)(1023 * greenBias)));
-  int offsetB = (1023 - map(LED_B, 0, 255, 0, (int)(1023 * blueBias)));
+  int red = accessPointMode ? 255 : LED_R;
+  int green = accessPointMode ? 0 : LED_G;
+  int blue = accessPointMode ? 0 : LED_B;
+  
+  int offsetR = (1023 - map(red, 0, 255, 0, (int)(1023 * redBias)));
+  int offsetG = (1023 - map(green, 0, 255, 0, (int)(1023 * greenBias)));
+  int offsetB = (1023 - map(blue, 0, 255, 0, (int)(1023 * blueBias)));
 
   // Write the Analog Values to the Pins
   analogWrite(PIN_LED_RED, offsetR);
@@ -57,9 +61,6 @@ void handleFlashAPModeLED() {
     previousFlashMillis = currentMillis;   
     if (flashStateOn == false) {
       flashStateOn = true;
-      LED_R = 255;
-      LED_G = 0;
-      LED_B = 0;
     } else {
       flashStateOn = false;
     }
@@ -86,7 +87,7 @@ void setNightlightOn(boolean newOn) {
     updateLED();
 
     // Save the updated config.
-    saveConfig();
+    lazyWriteConfig();
 }
 
 

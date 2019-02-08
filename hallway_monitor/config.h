@@ -34,10 +34,12 @@ const double greenBias = 1.0;
 const double blueBias = 1.0;
 
 // Globals
-bool writingConfig = false;                       // Keeps track of whether the config is being written at the moment
-const long lazyWriteDelay = 1000;                 // Wait this many MS to lazy write the config (useful to ensure we don't write too much consecutively)
-bool lazyWriteConfigFlag = false;                 // Flag to indicate that the config needs to be written, just not right now.
-long lastLazyWriteConfigDebounce = 0;             // Last time something wanted to lazy write to the config
+bool        writingConfig = false;                // Keeps track of whether the config is being written at the moment
+const long  lazyWriteDelay = 1000;                // Wait this many MS to lazy write the config (useful to ensure we don't write too much consecutively)
+bool        lazyWriteConfigFlag = false;          // Flag to indicate that the config needs to be written, just not right now.
+long        lastLazyWriteConfigDebounce = 0;      // Last time something wanted to lazy write to the config
+String      localIPAddress  = "";                 // The local IP address the device has been issued by the DCHP on the network (only updated on WiFi connect)
+
 
 
 /**

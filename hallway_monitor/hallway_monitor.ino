@@ -52,6 +52,9 @@ void setup() {
     Serial.println("done.");
   }
 
+  // Give SPIFFS a tick to catch up
+  delay(250);
+  
   // Initialise the LED
   if (!initLED()) {
     Serial.println("Failed to initialise the LED");
@@ -101,10 +104,7 @@ void loop() {
 
   // Don't perform these operations in hotSpotMode
   if (!accessPointMode) {
-    // Check to see if the alarm has been triggered
-    if (alarmTriggered) {
-      sendTriggerToIFTTT();
-    }
+    checkSensor();
   } else {
     // Flash the LEDs to indicate the device is in configuration mode
     handleFlashAPModeLED();
@@ -115,60 +115,3 @@ void loop() {
 
   delay(1);
 }
-
-
-/**
- * 
- */
-void sendTriggerToIFTTT() {
-  Serial.println("Sensor Tripped - Sending Trigger to IFTTT");
-  //makeIFTTTRequest();
-  //alarm_triggered = false;
-  //delay(10000);
-}
-
-
-
-// Make an HTTP request to the IFTTT web service
-void makeIFTTTRequest() {
-  // Make sure the WiFi is connected
-  if (initWifi()) {
-    Serial.print("Connecting to "); 
-    Serial.print(iftttServer);
-    
-    WiFiClient client;
-    int retries = 5;
-    while(!!!client.connect(iftttServer.c_str(), 80) && (retries-- > 0)) {
-      Serial.print(".");
-    }
-    Serial.println();
-    if(!!!client.connected()) {
-       Serial.println("Failed to connect, going back to sleep");
-    }
-    
-    Serial.print("Request resource: "); 
-    Serial.println(iftttEndpoint.c_str());
-    client.print(String("GET ") + iftttEndpoint + 
-                    " HTTP/1.1\r\n" +
-                    "Host: " + iftttServer + "\r\n" + 
-                    "Connection: close\r\n\r\n");
-                    
-    int timeout = 5 * 10; // 5 seconds             
-    while(!!!client.available() && (timeout-- > 0)){
-      delay(100);
-    }
-    if(!!!client.available()) {
-       Serial.println("No response, going back to sleep");
-    }
-    while(client.available()){
-      Serial.write(client.read());
-    }
-    
-    Serial.println("\nclosing connection");
-    client.stop();
-  }
-}
-
-
-
-

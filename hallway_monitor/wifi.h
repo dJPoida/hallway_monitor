@@ -30,10 +30,12 @@ boolean initWifi() {
       if(WiFi.status() != WL_CONNECTED) {
          Serial.println("Failed to connect!");
       }
+
+      localIPAddress = WiFi.localIP().toString();
     
       Serial.print("WiFi connected."); 
       Serial.print("IP address: "); 
-      Serial.println(WiFi.localIP());
+      Serial.println(localIPAddress);
   
       wifiConnected = (WiFi.status() == WL_CONNECTED);
     }

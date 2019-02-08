@@ -143,6 +143,25 @@ void handleGetConfig(AsyncWebServerRequest *request){
 
 
 /**
+ * Handles responding to an attempt to locate the device
+ * After setting the WiFi hotspot details, there's no way of knowing what IP address
+ * This device received. So the AP mode website will attempt to load this endpoint on
+ * every single IP address in the subnet, looking for a response.
+ * When it finds this device and hits this endpoint, it will respond to the 
+ * "marco" request with a "polo" response. The AP mode website will then re-direct the
+ * browser to the device control page at the located IP.
+ */
+void handleLocateDevice(AsyncWebServerRequest *request){
+  String response = "";
+  response += "{\"success\":true, \"echo\":\"polo\", \"ipAddress\":\"";
+  response += localIPAddress;
+  response += "\"}";
+  request->send(200, "text/json", response);
+}
+
+
+
+/**
  * Used when serving HTML files to replace key variables in the HTML with
  * current state data.
  */
@@ -226,9 +245,19 @@ boolean initWebServer() {
     handleSetNightlightRGB(request);
   });
 
+  // Set the enabled state of the sensor
+  server.on("/setsensorenabled", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleSetSensorEnabled(request);
+  });
+  
   // Get the current config as a JSON object
   server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){
     handleGetConfig(request);
+  });
+
+  // Respond to a request to locate the device
+  server.on("/marco", HTTP_GET, [](AsyncWebServerRequest *request){
+    handleLocateDevice(request);
   });
 
   // All other Files / Routes

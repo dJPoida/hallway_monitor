@@ -24,30 +24,50 @@
 </head>
 
 <body>
-    <div>
-        <h1>Hallway Monitor</h1>
+    <!-- Page Title -->
+    <header>
+        <div class="logo" href="#">
+            <img src="/img/monkey.svg">
+        </div>
+        <div class="title">
+            <h1>Hallway Monitor</h1>
+        </div>
+    </header>    
+
+    <section>
         <h2>Access Point Mode</h2>
         <div>
             <p>You're almost ready to go. The Hallway Montitor isn't configured to connect to an internet enabled WiFi Access Point.</p>
-            <p>Use this form to configure your access point details</p>
-            <div>
-                <form action="/setwifi" method="GET">
-                    <fieldset>
-                        <legend>WiFi Configuration</legend>
-                        <label for="wifiSSID">SSID</label>
-                        <input type="text" id="wifiSSID" name="wifiSSID" placeholder="SSID"/>
-                        <label for="wifiPassword">Password</label>
-                        <input type="text" id="wifiPassword" name="wifiPassword" placeholder="Password"/>
-                        <input type="submit" value="Save" />
-                    </fieldset>
-                </form>
+            <p>Provide the details of your WiFi network below:</p>
+        </div>
+    </section>
+    <section>
+        <h3>WiFi Configuration</h3>
+        <form id="form_new_wifi_config">
+            <label for="input_wifiSSID">SSID</label>
+            <input type="text" id="input_wifiSSID" name="wifiSSID" placeholder="SSID"/>
+            <label for="input_wifiPassword">Password</label>
+            <input type="text" id="input_wifiPassword" name="wifiPassword" placeholder="Password"/>
+            <button id="button_save" class="primary">Save</button>
+        </form>
+    </section>
+
+    <!-- Dialog: Scanning -->
+    <input type="checkbox" id="modal_scanning" class="modal">
+    <div>
+        <div class="card">
+            <h3 class="section">Please Wait...</h3>
+            <div class="section">
+                <p>
+                    Searching for the Hallway Monitor
+                </p>
+                <div>
+                    <label id="label_searching">Please Wait...</label>
+                </div>
             </div>
         </div>
     </div>
 
-
-    <script src="/js/jquery-3.3.1.min.js"></script>
-    <script src="/js/globals.js"></script>
-    <script src="/js/apmode.js"></script>
+    <script src="apmode.js"></script>
 </body>
 </html>

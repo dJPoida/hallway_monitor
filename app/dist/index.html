@@ -193,9 +193,23 @@
         </div>
     </div>
 
-    <script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="/js/kcp.min.js"></script>
-    <script type="text/javascript" src="/js/globals.js"></script>
-    <script type="text/javascript" src="/js/index.js"></script>
+    <!-- Dialog: WiFi Forgotten -->
+    <input type="checkbox" id="modal_wifi_forgotten" class="modal">
+    <div>
+        <div class="card">
+            <!-- <label for="modal_connecting" class="modal-close" ></label> -->
+            <h3 class="section">Device WiFi Disconnected</h3>
+            <div class="section">
+                <p>
+                    The Hallway Monitor has been disconnected from the WiFi network. You will now need to re-configure a new WiFi network.
+                </p>
+                <p>
+                    Please connect your device to the "Hallway Monitor" hotspot and point your browser to <a id="anchor_apmode" href="http://192.168.4.1">192.168.4.1</a> to configure the Hallway Monitor.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="index.js"></script>
 </body>
 </html>
