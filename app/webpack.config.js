@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const exec = require('child_process').exec;
-const env = process.env.NODE_ENV
+const env = process.env.NODE_ENV;
 
 module.exports = {
     mode: env || 'development',
@@ -53,7 +53,11 @@ module.exports = {
     },
     module: {
         rules: [
-          { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" }
+            { 
+                test: /\.js$/, 
+                exclude: /node_modules/, 
+                loader: "babel-loader" 
+            }
         ]
       }
 };

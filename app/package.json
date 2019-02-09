@@ -1,21 +1,34 @@
 {
+    "name": "hallway_monitor",
+    "author": "Peter Eldred (dJPoida)",
+    "version": "1.0.0",
+    "versionDate": "2019-02",
+    "description": "Controller for the game scoreboard and UI",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dJPoida/hallway_monitor.git"
+    },
+    "dependencies": {
+        "jquery": "^3.3.1"
+    },
     "devDependencies": {
         "@babel/core": "^7.2.2",
         "@babel/plugin-proposal-class-properties": "^7.3.0",
         "@babel/preset-env": "^7.3.1",
         "babel-loader": "^8.0.5",
         "clean-webpack-plugin": "^1.0.1",
+        "concurrently": "^4.1.0",
         "copy-webpack-plugin": "^4.6.0",
         "node-sass": "^4.11.0",
+        "nodemon": "^1.18.10",
         "webpack": "^4.29.3",
         "webpack-cli": "^3.2.3"
     },
     "scripts": {
-        "dev": "webpack --config webpack.config.js -w",
+        "dev": "concurrently --kill-others \"webpack --config webpack.config.js -w\" \"npm run watch-css\" ",
         "build": "SET NODE_ENV=production& webpack --config webpack.config.js -p",
-        "build-css": "node-sass src/scss -o pub/css"
-    },
-    "dependencies": {
-        "jquery": "^3.3.1"
+        "build-css": "node-sass src/scss -q -o pub/css",
+        "watch-css": "nodemon -e scss -x \"npm run build-css\""
     }
 }
